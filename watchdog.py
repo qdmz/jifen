@@ -18,7 +18,7 @@ import urllib.request
 ROOT = os.path.dirname(os.path.abspath(__file__))
 LOG = os.path.join(ROOT, 'logs', 'watchdog.log')
 PID_FILE = os.path.join(ROOT, 'logs', 'watchdog.pid')
-LOCK_PORT = 8799
+LOCK_OFFSET = 1000          # 单实例锁端口 = 服务端口 + 1000（同一台机器可跑多套部署）
 INTERVAL = 10
 
 
@@ -75,10 +75,16 @@ def start_app():
     log('已拉起 app.py（pythonw）')
 
 
-def single_instance():
+def lock_port(port):
+    """单实例锁端口：服务端口 + 1000（同一台机器跑多套部署互不影响）"""
+    return int(os.environ.get('JF_LOCK_PORT') or (int(port) + LOCK_OFFSET))
+
+
+def single_instance(port):
+    lp = lock_port(port)
     s = socket.socket()
     try:
-        s.bind(('127.0.0.1', LOCK_PORT))
+        s.bind(('127.0.0.1', lp))
         s.listen(1)
         return s
     except OSError:
@@ -100,9 +106,9 @@ def main():
         start_app()
         return 0
 
-    lock = single_instance()
+    lock = single_instance(port)
     if not lock:
-        log('已有守护进程在运行（锁 127.0.0.1:%d），退出' % LOCK_PORT)
+        log('已有守护进程在运行（锁 127.0.0.1:%d），退出' % lock_port(port))
         return 0
     with open(PID_FILE, 'w', encoding='utf-8') as fh:
         fh.write(str(os.getpid()))

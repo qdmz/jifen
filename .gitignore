@@ -10,6 +10,11 @@ __pycache__/
 .venv/
 venv/
 
+# 发布包
+dist/
+*.zip
+*.tar.gz
+
 # 系统
 .DS_Store
 Thumbs.db

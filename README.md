@@ -58,32 +58,67 @@
 
 ```
 jifen/
-├── app.py                  独立 HTTP 服务：静态文件 + 登录鉴权 + /api/jifen/*
-├── jifen.py                业务模块：账户/流水/订单/商品/规则/案例/按户归集
-├── watchdog.py             守护进程（可选）：探活失败自动拉起
+├── install.bat / install.sh    一键安装：环境检查 → 建目录 → 写配置 → 建库 → 装自启 → 启动 → 探活
+├── jifenctl.bat / jifenctl.sh  日常管理：status/start/stop/restart/logs/backup/passwd/doctor/uninstall
+├── start_tunnel.bat            起 Cloudflare Tunnel（域名对外，免管理员，自动注册登录自启）
+├── app.py                      独立 HTTP 服务：静态文件 + 登录鉴权 + /api/jifen/*
+├── jifen.py                    业务模块：账户/流水/订单/商品/规则/案例/按户归集
+├── watchdog.py                 守护进程（可选）：探活失败自动拉起
 ├── web/
-│   ├── jifen.html          村民端
-│   ├── jifen-admin.html    管理后台
-│   ├── login.html          后台登录
-│   └── assets/             css / js
+│   ├── jifen.html              村民端
+│   ├── jifen-admin.html        管理后台
+│   ├── login.html              后台登录
+│   └── assets/                 css / js
 ├── tools/
+│   ├── setup.py                安装/管理核心（Win+Linux 共用，install.bat/sh 只是壳）
+│   ├── tunnel.py               Cloudflare Tunnel 启停与自启
+│   ├── make_release.py         打发布包（dist/*.zip / *.tar.gz）
 │   ├── import_from_village.py  从村居系统 village.db 迁移积分数据 / 只取账号
 │   ├── seed_demo_site.py       生成演示站数据（12 户虚构村民，含流水/兑换/红黑榜）
 │   ├── seed_demo.py            给「测试」账户追加演示数据（培训/截图用）
 │   ├── reset_pwd.py            重置后台账号密码
 │   └── stop_app.py             停止服务（按 PID）
-├── data/                   运行期数据（数据库/图片/备份，已 gitignore）
-├── logs/                   运行日志（已 gitignore）
-├── config.example.json     配置示例
-├── start.bat / stop.bat    Windows 启停
+├── data/                       运行期数据（数据库/图片/备份，已 gitignore）
+├── logs/                       运行日志（已 gitignore）
+├── config.example.json         配置示例
+├── VERSION                     版本号（安装包/接口 /api/health 都会带上）
+├── start.bat / stop.bat        早期手工启停脚本（保留兼容）
 └── docs/
-    ├── DEPLOY.md           部署手册（Windows / Linux / Nginx / Cloudflare Tunnel）
-    └── USAGE.md            使用手册（村民端 + 后台逐模块）
+    ├── INSTALL.md              一键安装手册（Win / Linux / 离线包 / 常见问题）
+    ├── DEPLOY.md               部署手册（手工部署 / Nginx / Cloudflare Tunnel / 备份升级）
+    └── USAGE.md                使用手册（村民端 + 后台逐模块）
 ```
 
 ---
 
 ## 快速开始
+
+**一键安装（推荐，Windows / Linux 都只要一条命令）**
+
+```bat
+:: Windows：双击 install.bat，或在 cmd 里
+install.bat
+```
+```bash
+# Linux / macOS
+sudo sh install.sh
+```
+
+脚本会自动：检查 Python → 建目录 → 写 `config.json` → 建库建管理员 → 注册开机自启 → 启动并探活。
+装完直接打开 `http://127.0.0.1:8770/jifen.html`，后台 `admin` / `jifen2026`（首次安装时生成在 `logs/initial_admin.txt`）。
+
+常用参数：`--port 8080`、`--host 0.0.0.0`、`--data D:\jifen-data`、`--no-service`、`--admin-pwd 密码`；详见 **[docs/INSTALL.md](docs/INSTALL.md)**。
+
+日常管理（两平台命令一致）：
+
+```bat
+jifenctl.bat status | start | stop | restart | logs | backup | passwd | doctor | uninstall
+```
+```bash
+./jifenctl.sh status | start | stop | restart | logs | backup | passwd | doctor | uninstall
+```
+
+**手工运行（不想装自启时）**
 
 ```bash
 git clone https://github.com/qdmz/jifen.git
@@ -99,7 +134,8 @@ python app.py
 - 密码 `jifen2026`（**登录后请立刻在右上角「改密码」修改**）
 - 也可以用环境变量 `JF_ADMIN_PASSWORD` 指定初始密码
 
-Windows 用户直接双击 `start.bat`（后台运行）／`start_debug.bat`（前台看日志）／`stop.bat`。
+也可以用老脚本：`start.bat`（后台运行）／`start_debug.bat`（前台看日志）／`stop.bat`／`watchdog_start.bat`（守护）。
+这些老脚本是早期手工部署方式；新装机器建议直接用 `install.bat` / `install.sh` + `jifenctl`。
 
 ### 造一套演示数据（对外演示站就这么来）
 
@@ -185,7 +221,13 @@ python tools/import_from_village.py --src "E:\down\VillageManagementSystem\villa
 
 | 命令 | 作用 |
 | --- | --- |
+| `install.bat` / `sh install.sh` | 一键安装（见 [docs/INSTALL.md](docs/INSTALL.md)） |
+| `jifenctl.bat` / `./jifenctl.sh` | 状态、启停、日志、备份、改密、体检、卸载 |
+| `start_tunnel.bat` | 启动 Cloudflare Tunnel 并注册登录自启 |
+| `python tools/make_release.py` | 打发布包 `dist/jifen-<版本>.zip|tar.gz` |
 | `python app.py [--port 8770] [--host 0.0.0.0]` | 前台启动 |
+| `python app.py --init` | 只建库/建管理员并打印摘要（安装脚本用） |
+| `python app.py --version` | 看版本 |
 | `start.bat` / `stop.bat` | Windows 后台启动 / 停止（stop 会先停守护） |
 | `python watchdog.py` | 启动守护（10 秒探活，连续 2 次失败自动拉起） |
 | `python watchdog.py --status` | 看服务是否在线 |
@@ -228,5 +270,6 @@ python tools/import_from_village.py --src "E:\down\VillageManagementSystem\villa
 
 ## 文档
 
-- [部署手册 docs/DEPLOY.md](docs/DEPLOY.md)：Windows 常驻、Linux systemd、Nginx 反代、Cloudflare Tunnel 绑定域名、数据迁移、备份升级、故障排查
+- [一键安装 docs/INSTALL.md](docs/INSTALL.md)：Win/Linux 一条命令装好、参数、管理命令、离线包分发、常见问题
+- [部署手册 docs/DEPLOY.md](docs/DEPLOY.md)：手工部署、Windows 常驻、Linux systemd、Nginx 反代、Cloudflare Tunnel 绑定域名、数据迁移、备份升级、故障排查
 - [使用手册 docs/USAGE.md](docs/USAGE.md)：村民端怎么查分兑换、后台每个模块怎么用、积分制落地流程建议

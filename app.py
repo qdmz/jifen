@@ -7,6 +7,8 @@
     python app.py                 # 默认 127.0.0.1:8770
     JF_PORT=9000 python app.py
     python app.py --port 9000 --host 0.0.0.0
+    python app.py --init          # 只建库/建管理员/预置数据，打印摘要后退出
+    python app.py --version
 
 目录约定：
     web/            前端静态文件（村民端 jifen.html、后台 jifen-admin.html、登录页）
@@ -38,6 +40,17 @@ from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 WEB_DIR = os.path.join(BASE_DIR, 'web')
 LOG_DIR = os.path.join(BASE_DIR, 'logs')
+
+
+def _read_version():
+    try:
+        with open(os.path.join(BASE_DIR, 'VERSION'), 'r', encoding='utf-8') as fh:
+            return fh.read().strip() or '0.0.0'
+    except Exception:
+        return '0.0.0'
+
+
+VERSION = _read_version()
 
 # ---------------------------------------------------------------- 配置
 CONFIG = {}
@@ -347,7 +360,7 @@ class Handler(BaseHTTPRequestHandler):
             return self.send_bytes(200, b'', 'image/x-icon', 'public, max-age=86400')
         if path == '/api/health':
             return self.send_json(200, {'status': 'ok', 'time': time.strftime('%Y-%m-%d %H:%M:%S'),
-                                        'db': os.path.basename(DB_FILE)})
+                                        'db': os.path.basename(DB_FILE), 'version': VERSION})
         if path.startswith('/api/auth/'):
             return self._auth_api(path, method)
         if path.startswith('/api/jifen/'):
@@ -487,10 +500,43 @@ class Handler(BaseHTTPRequestHandler):
         return self.send_json(200, {'success': True, 'message': '密码已修改'})
 
 
+def init_report():
+    """--init：建库/建管理员/预置商品规则，打印摘要后退出（安装脚本调用）"""
+    conn = db_conn()
+    try:
+        def cnt(sql):
+            try:
+                return conn.execute(sql).fetchone()[0]
+            except Exception:
+                return 0
+        users = cnt("SELECT COUNT(*) FROM app_users")
+        accs = cnt("SELECT COUNT(*) FROM jf_accounts")
+        goods = cnt("SELECT COUNT(*) FROM jf_goods")
+        rules = cnt("SELECT COUNT(*) FROM jf_rules")
+        hus = cnt("SELECT COUNT(DISTINCT hu) FROM jf_accounts WHERE hu<>''")
+    finally:
+        conn.close()
+    log('[INIT] 数据库就绪：%s' % DB_FILE)
+    log('[INIT] 后台账号 %d 个｜积分账户 %d 人｜%d 户｜商品 %d 件｜规则 %d 条'
+        % (users, accs, hus, goods, rules))
+    pw_file = os.path.join(LOG_DIR, 'initial_admin.txt')
+    if os.path.isfile(pw_file):
+        try:
+            with open(pw_file, 'r', encoding='utf-8') as fh:
+                for line in fh:
+                    log('[INIT] ' + line.rstrip())
+        except Exception:
+            pass
+    return 0
+
+
 def main():
     cfg = load_config()
     port, host = cfg['port'], cfg['host']
     args = sys.argv[1:]
+    if '--version' in args or '-v' in args:
+        print('jifen %s' % VERSION)
+        return 0
     for i, a in enumerate(args):
         if a in ('--port', '-p') and i + 1 < len(args):
             port = int(args[i + 1])
@@ -498,6 +544,8 @@ def main():
             host = args[i + 1]
     init_auth()
     jifen.init()
+    if '--init' in args:
+        return init_report()
     pid_file = os.path.join(LOG_DIR, 'app.pid')
     try:
         with open(pid_file, 'w', encoding='utf-8') as fh:
@@ -524,4 +572,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main() or 0)

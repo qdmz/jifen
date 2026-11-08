@@ -1,6 +1,7 @@
 # 部署手册
 
 > 面向运维：把积分超市跑起来、用域名访问、出问题能查。
+> **只想尽快装好？看 [INSTALL.md](INSTALL.md)（一条命令搞定）**，本手册是手工部署与运维细节。
 > 使用说明见 [USAGE.md](USAGE.md)。
 
 - [1. 环境要求](#1-环境要求)
@@ -69,18 +70,23 @@ cd jifen
 
 ### 2.3 启动
 
+> 新机器建议直接跑 `install.bat`（见 [INSTALL.md](INSTALL.md)），下面这些脚本是手工部署/排错时用的。
+
 | 脚本 | 用途 |
 | --- | --- |
+| `install.bat` | 一键安装：写配置 → 建库 → 装自启 → 启动 → 探活 |
+| `jifenctl.bat` | 管理：`status` / `start` / `stop` / `restart` / `logs` / `backup` / `passwd` / `doctor` / `uninstall` |
 | `start.bat` | 后台启动（无窗口），随后打印访问地址 |
 | `start_debug.bat` | 前台启动，日志直接刷屏，排错用 |
 | `stop.bat` | 停止（会先停守护，否则会被拉起） |
 | `watchdog_start.bat` | 启动守护：10 秒探活，挂了自己拉起来 |
+| `start_tunnel.bat` | 起 Cloudflare Tunnel 并注册登录自启（对外域名用） |
 
 首次启动会：
 
 1. 建库 `data\jifen.db`
 2. 建管理员 `admin` / 你配置的初始密码（默认 `jifen2026`）
-3. 预置 8 件商品、15 条积分规则
+3. 预置 19 件商品、12 条积分规则
 
 验证：
 
@@ -451,13 +457,20 @@ curl http://127.0.0.1:8770/api/health
 | 入口 | 村民端 `/jifen.html`，后台 `/jifen-admin.html`（未登录跳 `/login.html`） |
 | 数据 | **独立演示库** `data/jifen.db`：只有后台账号 + 虚构演示数据，不碰村居生产库 |
 | 演示身份 | 张建国 / 手机 `13800000001`；测试 / 积分码 `888888` |
-| 对外通道 | Cloudflare Tunnel `ctyun-sales`（与 tianc / ctyun 两个站共用同一条隧道） |
-| 隧道 ingress | `jifen.qdmzctyun.dpdns.org → http://127.0.0.1:8770`（需管理员改 `systemprofile\.cloudflared\config.yml` 并重启 `Cloudflared` 服务） |
-| 启停 | `start.bat` / `stop.bat`；`watchdog_start.bat` 守护 |
+| 对外通道 | **独立隧道** `jifen-demo`（`71d37d49-38c7-4e11-9e60-425ff08fa27c`），不依赖管理员权限 |
+| 隧道配置 | `C:\Users\tianc\.cloudflared\jifen.yml`（ingress：jifen → 127.0.0.1:8770，兜底 404） |
+| 隧道常驻 | 双击 `start_tunnel.bat`：后台起 cloudflared + 注册登录自启任务 `JifenTunnel`；`tools\tunnel.py status` 看状态 |
+| 启停 | 应用：`start.bat` / `stop.bat` / `watchdog_start.bat`（或 `jifenctl.bat`）；隧道：`start_tunnel.bat` / `stop_tunnel.bat` |
 
-DNS 记录（`cloudflared tunnel route dns` 已生成）：
+DNS 记录（Cloudflare API 已改为指向新隧道）：
 
 ```
-jifen.qdmzctyun.dpdns.org  CNAME  <隧道ID>.cfargotunnel.com
+jifen.qdmzctyun.dpdns.org  CNAME  71d37d49-38c7-4e11-9e60-425ff08fa27c.cfargotunnel.com  （proxied）
 ```
+
+> 为什么单独开隧道：原来那条 `ctyun-sales` 隧道是 Windows 服务（LocalSystem）跑的，改它的 ingress 必须管理员权限改
+> `C:\Windows\System32\config\systemprofile\.cloudflared\config.yml` 再重启服务。为了不依赖管理员，给 jifen 单开了一条
+> 用户级隧道，`start_tunnel.bat` 一条命令搞定。
+> 若以后想收回同一条隧道：管理员跑 `E:\down\VillageManagementSystem\switch-tunnel.bat`（里面已含 jifen→8770），
+> 再把上面这条 CNAME 改回 `1bf0b260-91c5-4c6c-91f0-4cf5396236e8.cfargotunnel.com`，然后 `stop_tunnel.bat` + 停用 `JifenTunnel` 任务。
 
