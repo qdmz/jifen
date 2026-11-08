@@ -70,6 +70,7 @@ def main():
     ap.add_argument('--src', required=True, help='源库路径（village.db）')
     ap.add_argument('--dst', default=os.path.join(ROOT, 'data', 'jifen.db'), help='目标库路径')
     ap.add_argument('--with-users', action='store_true', help='同时复制账号表 app_users（沿用村居系统账号密码）')
+    ap.add_argument('--only-users', action='store_true', help='只复制账号表（不搬积分数据，配合 tools/seed_demo_site.py 做演示站）')
     ap.add_argument('--with-ledger', action='store_true', help='同时复制户籍台账（ledger_rows 中 lid=hukou）')
     ap.add_argument('--dry-run', action='store_true', help='只统计不写入')
     args = ap.parse_args()
@@ -93,18 +94,18 @@ def main():
     rows = []
     try:
         if args.dry_run:
-            for t in JF_TABLES:
+            for t in ([] if args.only_users else JF_TABLES):
                 try:
                     n = src.execute('SELECT COUNT(*) FROM "%s"' % t).fetchone()[0]
                 except sqlite3.OperationalError:
                     continue
                 rows.append({'table': t, 'src': n, 'dst_before': 0, 'dst_after': 0})
         else:
-            for t in JF_TABLES:
+            for t in ([] if args.only_users else JF_TABLES):
                 r = copy_table(src, dst, t)
                 if r:
                     rows.append(r)
-            if args.with_users:
+            if args.with_users or args.only_users:
                 r = copy_table(src, dst, 'app_users')
                 if r:
                     rows.append(r)
@@ -113,7 +114,7 @@ def main():
                 if r:
                     rows.append(r)
             # 源库没有商品/规则时，补上默认的一套，保证开箱可用
-            if not dst.execute('SELECT COUNT(*) FROM jf_goods').fetchone()[0]:
+            if not args.only_users and not dst.execute('SELECT COUNT(*) FROM jf_goods').fetchone()[0]:
                 jifen.init(seed=True)
     finally:
         try:

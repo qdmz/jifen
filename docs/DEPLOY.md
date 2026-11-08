@@ -39,12 +39,12 @@ python --version
 
 ### 2.1 放代码
 
-建议路径不含空格，例如 `E:\down\jifen-mall`：
+建议路径不含空格，例如 `E:\down\jifen`：
 
 ```bat
 cd /d E:\down
-git clone https://github.com/qdmz/jifen-mall.git
-cd jifen-mall
+git clone https://github.com/qdmz/jifen.git
+cd jifen
 ```
 
 没有 git 就下载 zip 解压。
@@ -101,18 +101,18 @@ curl http://127.0.0.1:8770/api/health
 1. `Win + R` → `taskschd.msc`
 2. 创建基本任务 → 名称「积分超市」
 3. 触发器：**登录时**（或「启动时」，需勾选「不管用户是否登录都运行」）
-4. 操作：启动程序 `E:\down\jifen-mall\watchdog_start.bat`
-5. 勾选「不管用户是否登录都运行」时，起始位置填 `E:\down\jifen-mall`
+4. 操作：启动程序 `E:\down\jifen\watchdog_start.bat`
+5. 勾选「不管用户是否登录都运行」时，起始位置填 `E:\down\jifen`
 
 `watchdog_start.bat` 会拉起守护进程；守护会负责拉起 `app.py`，所以只需要一个自启项。
 
 ### 3.2 NSSM 注册为 Windows 服务（更稳，推荐长期）
 
 ```bat
-nssm install JifenMall "C:\Python312\python.exe" "E:\down\jifen-mall\app.py"
-nssm set JifenMall AppDirectory E:\down\jifen-mall
-nssm set JifenMall AppStdout E:\down\jifen-mall\logs\stdout.log
-nssm set JifenMall AppStderr E:\down\jifen-mall\logs\stderr.log
+nssm install JifenMall "C:\Python312\python.exe" "E:\down\jifen\app.py"
+nssm set JifenMall AppDirectory E:\down\jifen
+nssm set JifenMall AppStdout E:\down\jifen\logs\stdout.log
+nssm set JifenMall AppStderr E:\down\jifen\logs\stderr.log
 nssm set JifenMall Start SERVICE_AUTO_START
 nssm start JifenMall
 ```
@@ -125,15 +125,15 @@ nssm start JifenMall
 
 ```bash
 sudo useradd -r -s /usr/sbin/nologin jifen || true
-sudo mkdir -p /opt/jifen-mall && sudo chown -R jifen:jifen /opt/jifen-mall
-sudo -u jifen git clone https://github.com/qdmz/jifen-mall.git /opt/jifen-mall
-cd /opt/jifen-mall
+sudo mkdir -p /opt/jifen && sudo chown -R jifen:jifen /opt/jifen
+sudo -u jifen git clone https://github.com/qdmz/jifen.git /opt/jifen
+cd /opt/jifen
 
 # 首次初始化（会建库、建管理员）
 sudo -u jifen python3 app.py --port 8770   # 看到「已启动」后 Ctrl+C
 ```
 
-`/etc/systemd/system/jifen-mall.service`：
+`/etc/systemd/system/jifen.service`：
 
 ```ini
 [Unit]
@@ -144,16 +144,16 @@ After=network.target
 Type=simple
 User=jifen
 Group=jifen
-WorkingDirectory=/opt/jifen-mall
+WorkingDirectory=/opt/jifen
 Environment=PYTHONIOENCODING=utf-8
 Environment=PYTHONUTF8=1
 Environment=JF_PORT=8770
 Environment=JF_HOST=127.0.0.1
-ExecStart=/usr/bin/python3 /opt/jifen-mall/app.py
+ExecStart=/usr/bin/python3 /opt/jifen/app.py
 Restart=always
 RestartSec=3
-StandardOutput=append:/opt/jifen-mall/logs/stdout.log
-StandardError=append:/opt/jifen-mall/logs/stderr.log
+StandardOutput=append:/opt/jifen/logs/stdout.log
+StandardError=append:/opt/jifen/logs/stderr.log
 
 [Install]
 WantedBy=multi-user.target
@@ -161,8 +161,8 @@ WantedBy=multi-user.target
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable --now jifen-mall
-sudo systemctl status jifen-mall
+sudo systemctl enable --now jifen
+sudo systemctl status jifen
 curl http://127.0.0.1:8770/api/health
 ```
 
@@ -307,6 +307,25 @@ data/backups/jf/   后台「立即备份」生成的 JSON
 
 与村居管理系统**完全隔离**，适合独立对外、或者以后迁到云服务器。
 
+### 7.1b 演示库（对外演示站用这套）
+
+对外演示**不要放真实村民数据**：只留后台账号，业务数据全部虚构。两步就能造出来：
+
+```bash
+# 1) 只搬账号，不搬任何 jf_* 业务数据
+python tools/import_from_village.py --src "E:\down\VillageManagementSystem\village.db" --only-users
+
+# 2) 灌虚构演示数据（12 户 / 31 人 / 191 条流水 / 4 张兑换单 / 3 条红黑榜）
+python tools/seed_demo_site.py
+```
+
+- `seed_demo_site.py` 会**先清空 `jf_*` 再重建**，可反复执行；`--clear` 只清空，`--db` 指定库文件
+- 演示身份：姓名 `张建国` + 手机 `13800000001`；姓名 `测试` + 积分码 `888888`
+- 演示站后台账号（`admin` / `demo` / `editor1` / `viewer` / `tianc`）密码统一重置为 `jifen2026`
+  ——**公开站绝不能留生产密码**，导入账号后逐个 `python tools/reset_pwd.py --user <账号> --pwd jifen2026`
+- 想换后台密码：`python tools/reset_pwd.py --list` 看账号，`--user admin --pwd 新密码` 改
+- 生成后自检：账户/流水/订单条数、每户余额链是否连续，脚本结尾会打印 `末笔余额不符: 0 | 余额不一致: 0`
+
 ### 7.2 共享库（过渡期推荐）
 
 如果村里已经有「村居管理系统」在用，两边各存一份积分必然对不上。让独立站直接读写村居库即可：
@@ -338,6 +357,7 @@ python tools/import_from_village.py --src "E:\down\VillageManagementSystem\villa
 | `--src` | 源库路径 |
 | `--dst` | 目标库，默认 `data/jifen.db` |
 | `--with-users` | 复制账号表（沿用原账号密码，免建号） |
+| `--only-users` | **只复制账号表**，不复制任何 `jf_*` 业务数据（演示站用） |
 | `--with-ledger` | 复制户籍台账（用于「从户籍导入」「按户籍地址归户」） |
 | `--dry-run` | 只统计条数，不写库 |
 
@@ -360,7 +380,7 @@ python tools/import_from_village.py --src "E:\down\VillageManagementSystem\villa
 - **定时**（Windows）：
 
 ```bat
-schtasks /create /tn "JifenBackup" /tr "xcopy /Y /I /E E:\down\jifen-mall\data E:\backup\jifen-data-%date:~0,4%%date:~5,2%%date:~8,2%\" /sc daily /st 02:00
+schtasks /create /tn "JifenBackup" /tr "xcopy /Y /I /E E:\down\jifen\data E:\backup\jifen-data-%date:~0,4%%date:~5,2%%date:~8,2%\" /sc daily /st 02:00
 ```
 
 > 备份前最好看一眼服务是否在写（凌晨跑最稳）。
@@ -374,8 +394,8 @@ schtasks /create /tn "JifenBackup" /tr "xcopy /Y /I /E E:\down\jifen-mall\data E
 ### 8.3 升级
 
 ```bash
-cd /opt/jifen-mall
-./stop.bat            # 或 sudo systemctl stop jifen-mall
+cd /opt/jifen
+./stop.bat            # 或 sudo systemctl stop jifen
 git pull
 python tools/import_from_village.py --src ...   # 只有跨版本需要补数据时才跑
 ./start.bat
@@ -420,15 +440,24 @@ curl http://127.0.0.1:8770/api/health
 
 ---
 
-## 附录 A：田冲村实际部署参数
+## 附录 A：本单位实际部署参数（演示站）
 
 | 项目 | 值 |
 | --- | --- |
-| 主机 | 村委会 Windows 11 主机（同时跑村居管理系统） |
-| 目录 | `E:\down\jifen-mall` |
-| 端口 | `8770`（仅本机） |
+| 主机 | 村委会 Windows 11 主机（与村居管理系统共用一台机器） |
+| 目录 | `E:\down\jifen-mall`（本机历史命名；从仓库 clone 下来是 `jifen`，两者内容一致） |
+| 端口 | `8770`（仅监听 `127.0.0.1`） |
 | 域名 | `https://jifen.qdmzctyun.dpdns.org` |
-| 入口 | 村民端 `/jifen.html`，后台 `/jifen-admin.html` |
-| 数据 | 共享库模式：`E:/down/VillageManagementSystem/village.db` |
-| 对外通道 | Cloudflare Tunnel `ctyun-sales`（与 tianc / ctyun 两个站共用） |
+| 入口 | 村民端 `/jifen.html`，后台 `/jifen-admin.html`（未登录跳 `/login.html`） |
+| 数据 | **独立演示库** `data/jifen.db`：只有后台账号 + 虚构演示数据，不碰村居生产库 |
+| 演示身份 | 张建国 / 手机 `13800000001`；测试 / 积分码 `888888` |
+| 对外通道 | Cloudflare Tunnel `ctyun-sales`（与 tianc / ctyun 两个站共用同一条隧道） |
+| 隧道 ingress | `jifen.qdmzctyun.dpdns.org → http://127.0.0.1:8770`（需管理员改 `systemprofile\.cloudflared\config.yml` 并重启 `Cloudflared` 服务） |
 | 启停 | `start.bat` / `stop.bat`；`watchdog_start.bat` 守护 |
+
+DNS 记录（`cloudflared tunnel route dns` 已生成）：
+
+```
+jifen.qdmzctyun.dpdns.org  CNAME  <隧道ID>.cfargotunnel.com
+```
+

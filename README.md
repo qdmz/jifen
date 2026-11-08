@@ -8,6 +8,10 @@
 - 管理后台：`/jifen-admin.html`（账号密码登录）
 
 > 本项目从「村居管理系统」中抽离而来，可独立部署、独立域名、独立数据库。
+>
+> 仓库：<https://github.com/qdmz/jifen> ｜ 演示站：<https://jifen.qdmzctyun.dpdns.org>
+>
+> **本仓库默认是「演示模式」**：只有后台账号 + 一套虚构的演示数据，不含任何真实村民信息。
 
 ---
 
@@ -53,7 +57,7 @@
 ## 目录结构
 
 ```
-jifen-mall/
+jifen/
 ├── app.py                  独立 HTTP 服务：静态文件 + 登录鉴权 + /api/jifen/*
 ├── jifen.py                业务模块：账户/流水/订单/商品/规则/案例/按户归集
 ├── watchdog.py             守护进程（可选）：探活失败自动拉起
@@ -63,8 +67,9 @@ jifen-mall/
 │   ├── login.html          后台登录
 │   └── assets/             css / js
 ├── tools/
-│   ├── import_from_village.py  从村居系统 village.db 迁移积分数据
-│   ├── seed_demo.py            生成演示数据（培训/截图用）
+│   ├── import_from_village.py  从村居系统 village.db 迁移积分数据 / 只取账号
+│   ├── seed_demo_site.py       生成演示站数据（12 户虚构村民，含流水/兑换/红黑榜）
+│   ├── seed_demo.py            给「测试」账户追加演示数据（培训/截图用）
 │   ├── reset_pwd.py            重置后台账号密码
 │   └── stop_app.py             停止服务（按 PID）
 ├── data/                   运行期数据（数据库/图片/备份，已 gitignore）
@@ -81,8 +86,8 @@ jifen-mall/
 ## 快速开始
 
 ```bash
-git clone https://github.com/qdmz/jifen-mall.git
-cd jifen-mall
+git clone https://github.com/qdmz/jifen.git
+cd jifen
 python app.py
 ```
 
@@ -96,7 +101,40 @@ python app.py
 
 Windows 用户直接双击 `start.bat`（后台运行）／`start_debug.bat`（前台看日志）／`stop.bat`。
 
-### 从村居管理系统迁移数据
+### 造一套演示数据（对外演示站就这么来）
+
+演示站只需要「后台账号 + 虚构数据」，两步：
+
+```bash
+# 1) 只搬账号（不带任何真实积分业务数据）
+python tools/import_from_village.py --src "E:\down\VillageManagementSystem\village.db" --only-users
+
+# 2) 灌一套虚构的演示数据：12 户 / 31 人 / 191 条流水 / 4 张兑换单 / 3 条红黑榜
+python tools/seed_demo_site.py
+```
+
+`seed_demo_site.py` 每次运行会先清空 `jf_*` 业务表再重建，所以可以反复跑；`--clear` 只清空不重建，`--db` 指定库文件。
+
+演示站可用以下身份查分（页面 → 查积分）：
+
+| 姓名 | 凭证 | 说明 |
+| --- | --- | --- |
+| 张建国 | 手机 `13800000001` | 户主，演示主力账号 |
+| 测试 | 积分码 `888888` | 通用测试账号 |
+
+后台账号来自第 1 步搬过来的 `app_users`，演示站已统一把密码重置为演示密码（公开站不要留生产密码）：
+
+| 用户名 | 角色 | 演示密码 |
+| --- | --- | --- |
+| `admin` | 管理员（全部功能） | `jifen2026` |
+| `demo` | 管理员 | `jifen2026` |
+| `editor1` / `viewer` / `tianc` | 浏览员（只读） | `jifen2026` |
+
+正式使用前务必改掉：`python tools/reset_pwd.py --user admin --pwd 你的新密码`（会顺带清空所有登录会话）。
+
+> 全部姓名、门牌、电话均为虚构，仅用于演示与培训，请勿用于真实村务记账。
+
+### 从村居管理系统迁移真实数据
 
 如果已经有 `village.db`（村居系统），一条命令把积分账户、流水、订单、商品、规则、红黑榜搬过来：
 
@@ -106,6 +144,7 @@ python tools/import_from_village.py --src "E:\down\VillageManagementSystem\villa
 
 - `--with-users`：连账号一起搬（沿用原账号密码登录，省得新建）
 - `--with-ledger`：搬户籍台账（后台「从户籍导入」「按户籍地址归户」才有数据）
+- `--only-users`：**只搬账号**，不搬任何积分业务数据（演示站用这个）
 - 可重复执行（按主键覆盖，不会重复）
 
 ---
@@ -132,10 +171,11 @@ python tools/import_from_village.py --src "E:\down\VillageManagementSystem\villa
 | `data_dir` | `JF_DATA_DIR` | 数据根目录（图片、备份），默认 `./data` |
 | `admin_password` | `JF_ADMIN_PASSWORD` | 首次建库时的管理员密码 |
 
-**两种数据模式：**
+**三种数据模式：**
 
-1. **独立库（默认）**：数据在 `data/jifen.db`，与村居系统互不影响。
+1. **独立库（默认，也是演示站用的）**：数据在 `data/jifen.db`，与村居系统互不影响。
 2. **共享库**：把 `db` 指向 `...\VillageManagementSystem\village.db`，`data_dir` 指向该目录，两个系统读写同一份积分数据（适合过渡期，避免两套积分对不上）。
+3. **演示库**：独立库 + `import_from_village.py --only-users` + `seed_demo_site.py`，只有账号和虚构数据，随便折腾不影响生产。
 
 详见 [docs/DEPLOY.md](docs/DEPLOY.md#数据模式)。
 
@@ -150,8 +190,9 @@ python tools/import_from_village.py --src "E:\down\VillageManagementSystem\villa
 | `python watchdog.py` | 启动守护（10 秒探活，连续 2 次失败自动拉起） |
 | `python watchdog.py --status` | 看服务是否在线 |
 | `python tools/reset_pwd.py` | 重置 admin 密码（随机）或 `--user/--pwd` 指定 |
-| `python tools/seed_demo.py` | 给「测试」账户造演示数据；`--clear` 清空 |
-| `python tools/import_from_village.py --src ...` | 从村居系统迁移数据 |
+| `python tools/seed_demo_site.py` | 生成整套演示站数据；`--clear` 只清空 |
+| `python tools/seed_demo.py` | 给「测试」账户追加演示数据；`--clear` 清空 |
+| `python tools/import_from_village.py --src ...` | 从村居系统迁移数据（`--only-users` 只搬账号） |
 | `python tools/stop_app.py` | 按 PID 停止（跨平台） |
 
 ---
