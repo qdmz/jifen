@@ -1,4 +1,4 @@
-/* 田冲村积分超市 · 村民端 */
+/* 积分超市 · 村民端 */
 (function () {
   'use strict';
   var API = '';
@@ -69,6 +69,13 @@
     bindRankSeg();
     bindCaseSeg();
     loadRank();
+  }
+
+  /* 站名简称：把「XX村积分超市」里的业态后缀去掉，得到「XX村」，用于卡片落款等 */
+  function siteShort() {
+    var n = (((S.cfg || {}).settings || {}).market_name || '').trim();
+    var s = n.replace(/(积分)?超市$/, '').replace(/积分制$/, '').trim();
+    return s ? ('积分制 · ' + s) : '积分制';
   }
 
   function applySettings() {
@@ -385,7 +392,7 @@
     }
     if (c.desc) h += '<div class="case-desc">' + esc(c.desc) + '</div>';
     h += '<div class="case-meta">' + (c.happen ? '<span>📅 ' + esc(c.happen) + '</span>' : '') +
-      '<span>积分制 · 田冲村</span></div>';
+      '<span>' + esc(siteShort()) + '</span></div>';
     return h + '</div></div>';
   }
 

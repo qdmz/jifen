@@ -1092,6 +1092,9 @@
         SET_FIELDS.forEach(function (f) { body[f[0]] = $('s_' + f[0]).value.trim(); });
         api('/api/jifen/admin/settings', body).then(function (d) {
           if (!d.success) { toast(d.error || '保存失败', true); return; }
+          S.cfg = body;
+          applySite();
+          if (S.dash) renderDash(S.dash);
           toast('已保存');
         });
       };
@@ -1872,6 +1875,25 @@
     }
   }
 
+  /* ---------------- 站点信息（超市名称等，跟随后台「超市设置」） ---------------- */
+  function siteName() {
+    var n = ((S.cfg || {}).market_name || '').trim();
+    return n || '积分超市';
+  }
+
+  function applySite() {
+    var name = siteName();
+    if ($('dashTtl')) $('dashTtl').textContent = name + ' · 运行分析';
+    if ($('topTitle')) $('topTitle').textContent = name;
+    document.title = name + ' · 管理后台';
+  }
+
+  function loadSite() {
+    return api('/api/jifen/config').then(function (d) {
+      if (d.success) { S.cfg = d.settings || {}; applySite(); }
+    }).catch(function () { });
+  }
+
   /* ---------------- 启动 ---------------- */
   api('/api/auth/me').then(function (d) {
     if (!d.success) { location.href = '/login.html?next=' + encodeURIComponent(location.pathname); return; }
@@ -1883,6 +1905,7 @@
     }
     bindAll();
     bindAuth();
+    loadSite();
     loadOverview();
   }).catch(function () { });
 })();

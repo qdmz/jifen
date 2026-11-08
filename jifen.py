@@ -148,9 +148,9 @@ SEED_RULES = [
 ]
 
 DEFAULT_SETTINGS = {
-    'market_name': '田冲村积分超市',
+    'market_name': '积分超市',
     'slogan': '小积分 · 大文明  人人参与 · 共建家园',
-    'address': '田冲村党群服务中心一楼',
+    'address': '村委会一楼积分超市',
     'open_time': '每周一、三、五  9:00—17:00',
     'contact': '村委会  0851-xxxxxxx',
     'notice': '积分按户累计、按人记账；兑换后请凭取货码到村委会一楼积分超市领取实物。积分不兑现、不转让，年度结余可结转。',
@@ -1844,9 +1844,9 @@ def _norm_grp(g):
     g = str(g or '').strip()
     if not g:
         return ''
-    # 去掉「XX镇田冲村」前缀（台账地址里常见）
-    if '田冲村' in g:
-        g = g.split('田冲村')[-1].strip()
+    # 去掉「XX镇XX村」前缀（台账地址里常见）；按「村」字锚定，换村也能用
+    if '村' in g:
+        g = g.split('村')[-1].strip()
         if not g:
             return ''
     for bad, good in _GRP_MERGE.items():
@@ -1897,7 +1897,7 @@ def _phone_by_id():
 #   4. 仍判不出 → 按户籍地址自成一户，并标「待核」，后台可人工调户。
 # 户键 hu = 「村民组·户主」，例：白粉墙组·罗仁德
 _HU_SYNC = {'ts': 0, 'sig': None}
-_HU_PREFIX = re.compile(r'^.*?田冲村')
+_HU_PREFIX = re.compile(r'^.*?村')
 
 
 def _hu_addr(hu):
@@ -1933,7 +1933,7 @@ def _hk_index(conn):
             continue
         if _s(d[8], 10) not in ('', '正常'):
             continue
-        m = re.search(r'田冲村(.+?组)', addr)
+        m = re.search(r'村(.+?组)', addr)
         grp = _norm_grp(m.group(1)) if m else ''
         rec = (addr, i, name, grp)
         idc = _s(d[1], 30).upper()
@@ -2297,7 +2297,7 @@ def _import_hukou_impl(conn):
         if not re.fullmatch(r'1\d{10}', phone):
             phone = ''
         grp = _s(d[7], 40)
-        m = re.search(r'田冲村(.+?组)', grp)
+        m = re.search(r'村(.+?组)', grp)
         grp = _norm_grp(m.group(1) if m else grp)
         idc = _s(d[1], 30)
         if not phone and idc:
