@@ -1,0 +1,14 @@
+# 换行符规范：Linux 脚本必须 LF，否则 sh 会把 \r 读进 shebang 报错
+*.sh            text eol=lf
+install.sh      text eol=lf
+jifenctl.sh     text eol=lf
+*.py            text eol=lf
+*.md            text eol=lf
+VERSION         text eol=lf
+*.json          text eol=lf
+*.yml           text eol=lf
+*.bat           text eol=crlf
+*.vbs           text eol=crlf
+*.html          text eol=lf
+*.js            text eol=lf
+*.css           text eol=lf
