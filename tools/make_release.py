@@ -85,7 +85,8 @@ def main():
         return 1
 
     required = ['app.py', 'jifen.py', 'install.bat', 'install.sh',
-                'jifenctl.bat', 'jifenctl.sh', 'web/jifen.html', 'web/jifen-admin.html']
+                'jifenctl.bat', 'jifenctl.sh', 'web/jifen.html', 'web/jifen-admin.html',
+                'web/_shared/js/echarts.min.js']
     have = {rel for _, rel in files}
     missing = [r for r in required if r not in have]
     if missing:
