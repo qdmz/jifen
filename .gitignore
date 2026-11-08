@@ -1,0 +1,15 @@
+# 运行期数据（数据库、上传图片、备份、日志）
+data/
+logs/
+config.json
+uploads/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# 系统
+.DS_Store
+Thumbs.db

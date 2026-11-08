@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#b5451a">
+<title>田冲村积分超市</title>
+<link rel="stylesheet" href="./assets/jifen.css?v=1.0.5">
+</head>
+<body>
+
+<header class="hd">
+  <div class="hd-bg"></div>
+  <div class="hd-in">
+    <div class="hd-l">
+      <div class="logo">🏪</div>
+      <div>
+        <h1 id="mkName">田冲村积分超市</h1>
+        <p id="mkSlogan">小积分 · 大文明</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- 我的积分 -->
+  <section class="card me" id="meCard">
+    <div class="me-empty" id="meEmpty">
+      <div class="me-empty-ic">🎫</div>
+      <div class="me-empty-t">查看我的积分</div>
+      <div class="me-empty-d">输入姓名和手机号 / 身份证后 6 位 / 积分码，即可查看积分</div>
+      <button class="btn main" id="btnLookup">查 积 分</button>
+    </div>
+    <div class="me-body hide" id="meBody">
+      <div class="me-top">
+        <div>
+          <div class="me-name"><span id="accName">—</span><i id="accGrp"></i></div>
+          <div class="me-sub" id="accPhone"></div>
+          <div class="me-code hide" id="accCode"></div>
+        </div>
+        <button class="btn ghost sm" id="btnSwitch">换人</button>
+      </div>
+      <div class="me-num"><b id="accPoints">0</b><span>分</span></div>
+      <div class="me-meta">
+        <div><b id="accEarned">0</b><span>累计获得</span></div>
+        <div><b id="accSpent">0</b><span>累计兑换</span></div>
+        <div><b id="accPending">0</b><span>待领取</span></div>
+      </div>
+      <div class="me-tip" id="meTip"></div>
+    </div>
+  </section>
+
+  <!-- 导航 -->
+  <nav class="tabs">
+    <button class="tab on" data-tab="goods">🛒 积分兑换</button>
+    <button class="tab" data-tab="case">📣 红黑榜</button>
+    <button class="tab" data-tab="rank">🏅 积分榜</button>
+    <button class="tab" data-tab="rules">📋 积分规则</button>
+    <button class="tab" data-tab="orders">📦 我的兑换</button>
+  </nav>
+
+  <!-- 商品 -->
+  <section class="pane on" id="pane-goods">
+    <div class="cats" id="cats"></div>
+    <div class="pgrid" id="pgrid"><div class="loading">正在加载商品…</div></div>
+    <div class="note" id="goodsNote"></div>
+  </section>
+
+  <!-- 积分红黑榜 -->
+  <section class="pane" id="pane-case">
+    <div class="pane-hd"><h2>积分红黑榜</h2><span id="caseHint">红榜表扬先进 · 黑榜警示后进</span></div>
+    <div class="rkseg" id="caseSeg">
+      <button class="on" data-ck="all">全部</button>
+      <button data-ck="red">🔴 红榜</button>
+      <button data-ck="black">⚫ 黑榜</button>
+    </div>
+    <div id="caseList"><div class="loading">加载中…</div></div>
+  </section>
+
+  <!-- 积分榜 -->
+  <section class="pane" id="pane-rank">
+    <div class="pane-hd"><h2>积分红榜</h2><span id="rankHint">按当前积分排序 · 姓名已脱敏</span></div>
+    <div class="rkseg" id="rankSeg">
+      <button class="on" data-rk="person">按个人</button>
+      <button data-rk="house">按户</button>
+    </div>
+    <div class="rank" id="rank"><div class="loading">加载中…</div></div>
+  </section>
+
+  <!-- 规则 -->
+  <section class="pane" id="pane-rules">
+    <div class="pane-hd"><h2>积分怎么挣</h2><span>参与村务、践行文明，都能加分</span></div>
+    <div id="rules"></div>
+  </section>
+
+  <!-- 我的兑换 -->
+  <section class="pane" id="pane-orders">
+    <div class="pane-hd"><h2>我的兑换记录</h2><span>凭取货码到积分超市领取</span></div>
+    <div id="myOrders"><div class="empty-hint">请先查询积分后查看兑换记录</div></div>
+  </section>
+
+  <footer class="ft">
+    <div id="ftAddr">田冲村党群服务中心一楼</div>
+    <div id="ftOpen"></div>
+    <div id="ftNotice" class="ft-notice"></div>
+    <a href="./jifen-admin.html" class="ft-admin">管理入口</a>
+  </footer>
+</main>
+
+<!-- 查积分 -->
+<div class="mask hide" id="mLookup">
+  <div class="sheet">
+    <div class="sheet-hd"><h3>查看我的积分</h3><button class="x" data-close>×</button></div>
+    <div class="sheet-bd">
+      <label class="fld"><span>姓名</span><input id="inName" type="text" placeholder="请输入本人姓名" autocomplete="off"></label>
+      <label class="fld"><span>村民组（有同名时必选）</span>
+        <select id="inGrp"><option value="">不确定 / 先不选</option></select></label>
+      <label class="fld"><span>手机号 / 身份证后 6 位 / 积分码</span><input id="inPhone" type="text" inputmode="numeric" maxlength="11" placeholder="手机号、身份证后 6 位，或 6 位积分码" autocomplete="off"></label>
+      <div class="fld-err" id="lookupErr"></div>
+      <div class="grp-pick hide" id="grpPick"></div>
+      <button class="btn main block" id="btnDoLookup">查 询</button>
+      <p class="fld-tip">没登记手机号的，填<b>身份证后 6 位</b>；连身份证信息也没有的，用村委会发放的 <b>6 位积分码</b>（见《积分登录卡》）。<br>同名村民请选对村民组。查不到请到村委会核对登记信息。</p>
+    </div>
+  </div>
+</div>
+
+<!-- 兑换确认 -->
+<div class="mask hide" id="mRedeem">
+  <div class="sheet">
+    <div class="sheet-hd"><h3>确认兑换</h3><button class="x" data-close>×</button></div>
+    <div class="sheet-bd" id="redeemBody"></div>
+  </div>
+</div>
+
+<!-- 兑换成功 / 取货码 -->
+<div class="mask hide" id="mDone">
+  <div class="sheet center">
+    <div class="ok-ic">✅</div>
+    <h3 class="ok-t">兑换成功</h3>
+    <p class="ok-d">请凭下方取货码到积分超市领取</p>
+    <div class="code" id="doneCode">------</div>
+    <div class="code-t">取 货 码</div>
+    <div class="ok-list" id="doneList"></div>
+    <div class="ok-bal" id="doneBal"></div>
+    <button class="btn main block" data-close>知道了</button>
+  </div>
+</div>
+
+<div class="toast hide" id="toast"></div>
+<script src="./assets/jifen.js?v=1.0.5"></script>
+</body>
+</html>

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>积分超市 · 管理后台</title>
+<link rel="stylesheet" href="./assets/jifen-admin.css?v=1.0.7">
+</head>
+<body>
+
+<div class="top">
+  <div class="t"><span class="ic">🏪</span><span id="topTitle">积分超市管理</span></div>
+  <div class="sp"></div>
+  <span class="u" id="whoami"></span>
+  <a href="./jifen.html" target="_blank">村民端 ↗</a>
+  <a href="#" id="btnPwd">改密码</a>
+  <a href="#" id="btnLogout">退出</a>
+</div>
+
+<div class="wrap">
+  <aside class="side">
+    <button class="on" data-p="ov">📊 数据概览</button>
+    <button data-p="dash">📈 数据大屏</button>
+    <button data-p="goods">🎁 商品管理</button>
+    <button data-p="grant">➕ 积分发放</button>
+    <button data-p="verify">🎫 兑换核销</button>
+    <button data-p="acc">👥 积分账户</button>
+    <button data-p="txn">📜 积分流水</button>
+    <button data-p="rule">📋 积分规则</button>
+    <button data-p="case">📣 红黑榜</button>
+    <button data-p="data">🗄️ 数据管理</button>
+    <button data-p="set">⚙️ 超市设置</button>
+  </aside>
+
+  <main class="main">
+
+    <!-- 概览 -->
+    <section class="panel on" id="p-ov">
+      <div class="phead"><h2>数据概览</h2><span class="hint" id="ovTime"></span></div>
+      <div class="kpis" id="kpis"></div>
+      <div class="two">
+        <div class="box">
+          <div class="box-hd"><h3>最近兑换</h3><button class="btn sm ghost" data-go="verify">去核销 →</button></div>
+          <div id="ovOrders"></div>
+        </div>
+        <div class="box">
+          <div class="box-hd"><h3>库存预警（≤5 件）</h3><button class="btn sm ghost" data-go="goods">去补货 →</button></div>
+          <div id="ovStock"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 数据大屏 -->
+    <section class="panel" id="p-dash">
+      <div class="phead">
+        <h2>数据统计分析</h2>
+        <div class="seg" id="dashRange">
+          <button data-dr="7">近 7 天</button>
+          <button class="on" data-dr="30">近 30 天</button>
+          <button data-dr="90">近 90 天</button>
+          <button data-dr="365">近一年</button>
+        </div>
+        <div class="sp"></div>
+        <button class="btn ghost" id="btnDashPrint">🖨 打印 / 导出 PDF</button>
+        <button class="btn ghost" id="btnDashRefresh">刷新</button>
+        <button class="btn primary" id="btnDashFull">⛶ 全屏</button>
+      </div>
+      <div class="dash" id="dash">
+        <button class="dash-x" id="dashExit" title="退出全屏（Esc）">✕</button>
+        <div class="dash-hd">
+          <div>
+            <div class="dash-ttl">田冲村积分超市 · 运行分析</div>
+            <div class="dash-sub" id="dashSub">数据加载中…</div>
+          </div>
+          <div class="dash-clock" id="dashClock"></div>
+        </div>
+        <div class="dash-kpi" id="dashKpi"></div>
+        <div class="dash-grid">
+          <div class="dcard full"><h4>积分收支趋势 <i>按日</i></h4><div class="dchart lg" id="chTrend"></div></div>
+          <div class="dcard wide"><h4>村民组积分分布</h4><div class="dchart" id="chGrp"></div></div>
+          <div class="dcard"><h4>兑换分类占比</h4><div class="dchart" id="chCat"></div></div>
+          <div class="dcard"><h4>订单核销情况</h4><div class="dchart" id="chStatus"></div></div>
+          <div class="dcard wide"><h4>热门兑换商品 TOP</h4><div class="dchart" id="chGoods"></div></div>
+          <div class="dcard wide">
+            <h4>加分事由 TOP <i>按累计分值</i></h4>
+            <div class="drank" id="dashReason"></div>
+          </div>
+          <div class="dcard full">
+            <h4>积分排行榜
+              <div class="seg dark" id="dashRankSeg">
+                <button class="on" data-rk="person">按个人</button>
+                <button data-rk="house">按户</button>
+              </div>
+            </h4>
+            <div class="drank two" id="dashRank"></div>
+          </div>
+        </div>
+        <div class="dash-ft" id="dashFoot">数据来源：积分超市业务库 · 实时统计</div>
+      </div>
+    </section>
+
+    <!-- 商品 -->
+    <section class="panel" id="p-goods">
+      <div class="phead">
+        <h2>商品管理</h2>
+        <div class="sp"></div>
+        <input class="srch" id="gsearch" placeholder="搜索商品名/分类">
+        <button class="btn primary" id="btnAddGoods">+ 新增商品</button>
+      </div>
+      <div class="tbl-wrap"><table class="tbl" id="tGoods"></table></div>
+    </section>
+
+    <!-- 发放 -->
+    <section class="panel" id="p-grant">
+      <div class="phead"><h2>积分发放</h2><span class="hint">按活动类型给村民加分，可批量</span></div>
+      <div class="grant">
+        <div class="gform">
+          <label class="fld"><span>活动类型（自动带出分值）</span>
+            <select id="grRule"></select></label>
+          <label class="fld"><span>本次分值</span>
+            <input id="grPoints" type="number" value="5" min="1" step="1"></label>
+          <label class="fld"><span>事由说明（记入流水）</span>
+            <input id="grReason" type="text" placeholder="如：2026年11月环境整治义务劳动"></label>
+          <label class="fld"><span>快捷人数</span>
+            <div class="chips" id="grQuick"></div></label>
+          <button class="btn primary block" id="btnGrant">确认发放</button>
+          <div class="fld-tip">已选 <b id="grCount">0</b> 人，合计 <b id="grSum">0</b> 分</div>
+        </div>
+        <div class="glist">
+          <div class="glist-hd">
+            <input class="srch" id="grSearch" placeholder="搜索姓名 / 手机号 / 组别">
+            <label class="chk"><input type="checkbox" id="grAll"> 全选当前结果</label>
+          </div>
+          <div class="glist-bd" id="grPeople"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 核销 -->
+    <section class="panel" id="p-verify">
+      <div class="phead"><h2>兑换核销</h2><span class="hint">村民报取货码，核对后点「已领取」</span></div>
+      <div class="codebox">
+        <input id="vCode" placeholder="输入 6 位取货码" maxlength="6" inputmode="numeric">
+        <button class="btn primary" id="btnFind">查找</button>
+      </div>
+      <div id="vResult"></div>
+      <div class="phead" style="margin-top:24px"><h2 style="font-size:16px">兑换单列表</h2>
+        <div class="sp"></div>
+        <select class="srch" id="oStatus"><option>待领取</option><option>已领取</option><option>已取消</option><option>全部</option></select>
+        <input class="srch" id="oSearch" placeholder="姓名/取货码/手机">
+      </div>
+      <div id="orderList"></div>
+      <div class="pager" id="orderPager"></div>
+    </section>
+
+    <!-- 账户 -->
+    <section class="panel" id="p-acc">
+      <div class="phead">
+        <h2>积分账户</h2>
+        <div class="seg" id="accView">
+          <button class="on" data-av="person">按人</button>
+          <button data-av="house">按户</button>
+        </div>
+        <div class="sp"></div>
+        <input class="srch" id="aSearch" placeholder="姓名 / 手机 / 组别 / 积分码">
+        <button class="btn ghost" id="btnHuCheck" style="display:none">分户核对</button>
+        <button class="btn ghost" id="btnHuAssign">分户调整</button>
+        <button class="btn ghost" id="btnCards">导出登录卡</button>
+        <button class="btn ghost" id="btnCodeFill">补齐积分码</button>
+        <button class="btn ghost" id="btnImport">从户籍导入</button>
+        <button class="btn primary" id="btnAddAcc">+ 新增账户</button>
+      </div>
+      <div class="hint" id="houseHint" style="margin:-6px 0 12px;"></div>
+      <div class="tbl-wrap"><table class="tbl" id="tAcc"></table></div>
+      <div class="pager" id="accPager"></div>
+    </section>
+
+    <!-- 流水 -->
+    <section class="panel" id="p-txn">
+      <div class="phead">
+        <h2>积分流水</h2>
+        <div class="sp"></div>
+        <input class="srch" id="tSearch" placeholder="姓名 / 事由 / 单号">
+        <button class="btn ghost" id="btnExportTxn">导出 CSV</button>
+      </div>
+      <div class="tbl-wrap"><table class="tbl" id="tTxn"></table></div>
+      <div class="pager" id="txnPager"></div>
+    </section>
+
+    <!-- 规则 -->
+    <section class="panel" id="p-rule">
+      <div class="phead">
+        <h2>积分规则</h2><span class="hint">村民端「积分规则」页展示的内容</span>
+        <div class="sp"></div>
+        <button class="btn primary" id="btnAddRule">+ 新增规则</button>
+      </div>
+      <div class="tbl-wrap"><table class="tbl" id="tRule"></table></div>
+    </section>
+
+    <!-- 红黑榜 -->
+    <section class="panel" id="p-case">
+      <div class="phead">
+        <h2>积分红黑榜</h2>
+        <span class="hint">村民端「红黑榜」页展示的加减分案例（可配现场照片）</span>
+        <div class="sp"></div>
+        <button class="btn primary" id="btnAddCase">+ 新增案例</button>
+      </div>
+      <div class="hint" id="caseStat" style="margin:-6px 0 12px;"></div>
+      <div class="tbl-wrap"><table class="tbl" id="tCase"></table></div>
+    </section>
+
+    <!-- 数据管理 -->
+    <section class="panel" id="p-data">
+      <div class="phead">
+        <h2>数据管理</h2>
+        <span class="hint">数据体检 · 报表下载 · 备份与恢复</span>
+        <div class="sp"></div>
+        <button class="btn ghost" id="btnHealth">重新体检</button>
+      </div>
+
+      <div class="box">
+        <div class="box-hd"><h3>数据体检</h3><span class="hint" id="healthTs"></span></div>
+        <div class="hlist" id="healthList"></div>
+      </div>
+
+      <div class="box">
+        <div class="box-hd"><h3>报表下载</h3><span class="hint">CSV（UTF-8 BOM），Excel / WPS 双击即可打开</span></div>
+        <div class="dtrange">
+          <span class="hint">统计区间</span>
+          <input type="date" id="rptFrom" class="srch">
+          <span class="hint">—</span>
+          <input type="date" id="rptTo" class="srch">
+          <button class="btn ghost sm" data-rq="month">本月</button>
+          <button class="btn ghost sm" data-rq="year">今年</button>
+          <button class="btn ghost sm" data-rq="all">全部</button>
+        </div>
+        <div class="rptgrid" id="rptGrid"></div>
+      </div>
+
+      <div class="box">
+        <div class="box-hd"><h3>数据备份与恢复</h3>
+          <span class="hint">备份含账户、流水、兑换单、商品、规则、设置、红黑榜</span></div>
+        <div class="bkgrid">
+          <div class="bkcard">
+            <h4>① 备份到服务器</h4>
+            <p>存于服务器 <code>backups/jf/</code>，常规备份保留最近 20 份，可一键恢复。</p>
+            <button class="btn primary" id="btnBackupNow">立即备份</button>
+          </div>
+          <div class="bkcard">
+            <h4>② 下载到本机</h4>
+            <p>导出 JSON 备份文件，用于离线归档、换机迁移或长期保存。</p>
+            <button class="btn ghost" id="btnBackupDownload">下载备份文件</button>
+          </div>
+          <div class="bkcard">
+            <h4>③ 从文件恢复</h4>
+            <p>选择本机 JSON 备份，核对摘要后覆盖或合并到当前数据。</p>
+            <input type="file" id="bkFile" accept=".json,application/json" class="hide">
+            <button class="btn ghost" id="btnBackupUpload">选择备份文件…</button>
+          </div>
+        </div>
+        <div class="tbl-wrap" style="margin-top:14px"><table class="tbl" id="tBackups"></table></div>
+        <div class="hint" id="bkTip" style="margin-top:8px;"></div>
+      </div>
+    </section>
+
+    <!-- 设置 -->
+    <section class="panel" id="p-set">
+      <div class="phead"><h2>超市设置</h2></div>
+      <div class="setform" id="setForm"></div>
+    </section>
+
+  </main>
+</div>
+
+<!-- 通用弹窗 -->
+<div class="mask hide" id="mBox">
+  <div class="dlg">
+    <div class="dlg-hd"><h3 id="mbTitle">编辑</h3><button class="x" data-close>×</button></div>
+    <div class="dlg-bd" id="mbBody"></div>
+    <div class="dlg-ft" id="mbFoot"></div>
+  </div>
+</div>
+
+<div class="toast hide" id="toast"></div>
+<script src="./_shared/js/echarts.min.js"></script>
+<script src="./assets/jifen-admin.js?v=1.1.0"></script>
+</body>
+</html>
