@@ -1,0 +1,78 @@
+<view class="page">
+  <view class="err" wx:if="{{err}}">{{err}}</view>
+
+  <block wx:if="{{acc}}">
+    <view class="card me-card">
+      <view class="row between">
+        <view>
+          <view class="me-name">{{acc.name}}</view>
+          <view class="me-sub">{{acc.grp || '未归户'}}<text wx:if="{{acc.phone_mask}}"> · {{acc.phone_mask}}</text></view>
+        </view>
+        <view class="me-pts">{{acc.points}}<text class="me-unit">分</text></view>
+      </view>
+      <view class="me-row">
+        <view class="me-cell">
+          <view class="mc-v">{{acc.earned}}</view>
+          <view class="mc-l">累计获得</view>
+        </view>
+        <view class="me-cell">
+          <view class="mc-v">{{acc.spent}}</view>
+          <view class="mc-l">已兑换</view>
+        </view>
+        <view class="me-cell">
+          <view class="mc-v">{{acc.code || '—'}}</view>
+          <view class="mc-l">积分码</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="card" wx:if="{{pending.length > 0}}">
+      <view class="card-t">待领取 <text class="more">凭取货码到积分超市领取</text></view>
+      <view class="item" wx:for="{{pending}}" wx:key="id" data-code="{{item.code}}" bindtap="copyCode">
+        <view class="ic">🎫</view>
+        <view class="bd">
+          <view class="nm">{{item.items_text}}</view>
+          <view class="sub">{{item.created}} · {{item.points}} 分</view>
+        </view>
+        <view class="code">{{item.code}}</view>
+      </view>
+      <view class="muted tip">点击条目可复制取货码</view>
+    </view>
+
+    <view class="card">
+      <view class="card-t">最近积分变动</view>
+      <view class="empty" wx:if="{{txns.length === 0}}">还没有积分流水</view>
+      <view class="item" wx:for="{{txns}}" wx:key="id">
+        <view class="bd">
+          <view class="nm">{{item.reason}}</view>
+          <view class="sub">{{item.created}}</view>
+        </view>
+        <view class="pts {{item.plus ? 'plus' : 'minus'}}">{{item.plus ? '+' : ''}}{{item.points}}</view>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="card-t">我的兑换单</view>
+      <view class="empty" wx:if="{{orders.length === 0}}">还没有兑换过，去<text class="lnk" bindtap="goGoods">积分兑换</text>看看</view>
+      <view class="item" wx:for="{{orders}}" wx:key="id">
+        <view class="bd">
+          <view class="nm">{{item.items_text}}</view>
+          <view class="sub">{{item.created}} · {{item.points}} 分</view>
+        </view>
+        <view class="ost {{item.wait ? 'wait' : ''}}">{{item.status}}</view>
+      </view>
+    </view>
+
+    <view class="btn ghost" bindtap="logout">退出登录</view>
+  </block>
+
+  <block wx:else>
+    <view class="card login">
+      <view class="login-ic">🔍</view>
+      <view class="login-t">查看我的积分</view>
+      <view class="muted login-s">输入姓名 + 手机号（或身份证后 6 位 / 积分码），以后打开自动记住</view>
+      <view class="btn primary" bindtap="goBind">立即查询</view>
+    </view>
+    <view class="foot">积分按户累计、按人记账 · 不兑现、不转让</view>
+  </block>
+</view>

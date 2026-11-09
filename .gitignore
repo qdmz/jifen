@@ -15,6 +15,10 @@ dist/
 *.zip
 *.tar.gz
 
+# 小程序本地私有配置（开发者工具会生成）
+miniprogram/project.private.config.json
+miniprogram/node_modules/
+
 # 系统
 .DS_Store
 Thumbs.db

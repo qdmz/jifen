@@ -1,0 +1,41 @@
+<view class="page">
+  <view class="bar" wx:if="{{acc}}">
+    <text class="bar-l">当前可用</text>
+    <text class="bar-v">{{acc.points}} 分</text>
+    <text class="bar-n">{{acc.name}}</text>
+  </view>
+  <view class="bar ghost" wx:else bindtap="goBindTap">
+    <text class="bar-l">还没查过积分，点击查询后再兑换</text>
+  </view>
+
+  <scroll-view class="cats" scroll-x="true" enable-flex="true">
+    <view class="cat {{cat === item ? 'on' : ''}}"
+          wx:for="{{cats}}" wx:key="*this"
+          data-cat="{{item}}" bindtap="pickCat">{{item}}</view>
+  </scroll-view>
+
+  <view class="err" wx:if="{{err}}">{{err}}</view>
+
+  <view class="empty" wx:if="{{!loading && shown.length === 0}}">这个分类下暂时没有可兑换的商品</view>
+
+  <view class="gcard" wx:for="{{shown}}" wx:key="id">
+    <view class="gic">{{item.icon}}</view>
+    <view class="gbd">
+      <view class="gnm">{{item.name}}</view>
+      <view class="gsub" wx:if="{{item.spec}}">{{item.spec}}</view>
+      <view class="gsub" wx:if="{{item.desc}}">{{item.desc}}</view>
+      <view class="gfoot">
+        <text class="gpts">{{item.points}} 分</text>
+        <text class="tag gray" wx:if="{{item.stock > 0}}">库存 {{item.stock}}</text>
+        <text class="tag gray" wx:if="{{item.stock <= 0}}">已换完</text>
+        <text class="tag" wx:if="{{item.limit_per > 0}}">每人限 {{item.limit_per}} 件</text>
+      </view>
+    </view>
+    <view class="gact">
+      <view class="btn primary small {{item.soldout ? 'disabled' : ''}}"
+            data-id="{{item.id}}" bindtap="exchange">{{item.soldout ? '已换完' : '兑换'}}</view>
+    </view>
+  </view>
+
+  <view class="foot">兑换后生成取货码，凭码到积分超市领取实物；积分不兑现、不转让</view>
+</view>

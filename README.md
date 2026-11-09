@@ -271,5 +271,7 @@ python tools/import_from_village.py --src "E:\down\VillageManagementSystem\villa
 ## 文档
 
 - [一键安装 docs/INSTALL.md](docs/INSTALL.md)：Win/Linux 一条命令装好、参数、管理命令、离线包分发、常见问题
+- [微信部署 docs/DEPLOY-WECHAT.md](docs/DEPLOY-WECHAT.md)：小程序工程导入、体验版、备案域名、类目/隐私指引、公众号菜单
 - [部署手册 docs/DEPLOY.md](docs/DEPLOY.md)：手工部署、Windows 常驻、Linux systemd、Nginx 反代、Cloudflare Tunnel 绑定域名、数据迁移、备份升级、故障排查
 - [使用手册 docs/USAGE.md](docs/USAGE.md)：村民端怎么查分兑换、后台每个模块怎么用、积分制落地流程建议
+- [小程序源码 miniprogram/](miniprogram/)：原生小程序（首页/兑换/排行/我的/查询），复用同一后端

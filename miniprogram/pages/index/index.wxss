@@ -1,0 +1,114 @@
+.hero {
+  padding: 8rpx 8rpx 28rpx;
+}
+
+.hero-name {
+  font-size: 44rpx;
+  font-weight: 800;
+  letter-spacing: 1rpx;
+  color: #3a2a20;
+}
+
+.hero-slogan {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #9a8b7f;
+}
+
+.pts-card {
+  background: linear-gradient(135deg, #c9541f, #a83f18);
+  color: #fff;
+  box-shadow: 0 12rpx 30rpx rgba(168, 63, 24, 0.25);
+}
+
+.pts-label {
+  font-size: 27rpx;
+  opacity: 0.92;
+}
+
+.pts-val {
+  font-size: 80rpx;
+  font-weight: 800;
+  line-height: 1.1;
+  margin: 12rpx 0 16rpx;
+}
+
+.pts-unit {
+  font-size: 28rpx;
+  font-weight: 500;
+  margin-left: 8rpx;
+  opacity: 0.85;
+}
+
+.pts-meta .muted {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 23rpx;
+}
+
+.pts-code {
+  margin-top: 16rpx;
+  font-size: 23rpx;
+  background: rgba(255, 255, 255, 0.16);
+  padding: 10rpx 18rpx;
+  border-radius: 12rpx;
+}
+
+.pts-tip {
+  color: rgba(255, 255, 255, 0.85);
+  margin: 12rpx 0 24rpx;
+  line-height: 1.6;
+}
+
+.pts-card .btn.primary {
+  background: #fff;
+  color: #b5451a;
+}
+
+.grid {
+  display: flex;
+  margin-bottom: 24rpx;
+}
+
+.grid-i {
+  flex: 1;
+  background: #fff;
+  border-radius: 22rpx;
+  padding: 26rpx 12rpx;
+  margin-right: 16rpx;
+  text-align: center;
+  box-shadow: 0 6rpx 18rpx rgba(90, 60, 40, 0.05);
+}
+
+.grid-i:last-child {
+  margin-right: 0;
+}
+
+.grid-ic {
+  font-size: 40rpx;
+}
+
+.grid-t {
+  font-size: 26rpx;
+  font-weight: 600;
+  margin-top: 10rpx;
+}
+
+.grid-s {
+  font-size: 21rpx;
+  color: #a5978a;
+  margin-top: 4rpx;
+}
+
+.notice {
+  font-size: 26rpx;
+  line-height: 1.75;
+  color: #5c4a3d;
+}
+
+.foot {
+  padding: 16rpx 12rpx 0;
+  font-size: 22rpx;
+  color: #a5978a;
+  line-height: 1.7;
+  text-align: center;
+}

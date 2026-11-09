@@ -411,6 +411,25 @@ def _acc_admin(r):
 _LOOKUP_FAIL = {}
 
 
+def client_ip(handler):
+    """真实客户端 IP：经 Cloudflare Tunnel / Nginx 反代时取请求头，否则用 socket 地址。
+    不处理这一层，所有访客都会被当成 127.0.0.1，一个人输错就锁住全村。"""
+    h = getattr(handler, 'headers', None)
+    if h is not None:
+        for k in ('CF-Connecting-IP', 'X-Real-IP', 'X-Forwarded-For'):
+            try:
+                v = h.get(k)
+            except Exception:
+                v = None
+            if not v:
+                continue
+            v = str(v).split(',')[0].strip()
+            if v:
+                return v
+    addr = getattr(handler, 'client_address', None) or ('',)
+    return addr[0]
+
+
 def _lookup_locked(ip):
     rec = _LOOKUP_FAIL.get(str(ip or ''))
     return bool(rec and rec[1] > time.time())
@@ -1415,7 +1434,7 @@ def handle_post(handler, p):
     try:
         # ---------- 公开：查积分 ----------
         if p == '/api/jifen/lookup':
-            ip = (getattr(handler, 'client_address', None) or ('',))[0]
+            ip = client_ip(handler)
             if _lookup_locked(ip):
                 return _err(handler, '尝试次数过多，请 5 分钟后再试，或直接到村委会查询', 429)
             name = _s(body.get('name'), 40)

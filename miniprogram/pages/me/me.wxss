@@ -1,0 +1,110 @@
+.me-card {
+  background: linear-gradient(135deg, #c9541f, #a83f18);
+  color: #fff;
+}
+
+.me-name {
+  font-size: 36rpx;
+  font-weight: 800;
+}
+
+.me-sub {
+  font-size: 23rpx;
+  opacity: 0.85;
+  margin-top: 8rpx;
+}
+
+.me-pts {
+  font-size: 54rpx;
+  font-weight: 800;
+}
+
+.me-unit {
+  font-size: 24rpx;
+  margin-left: 6rpx;
+  opacity: 0.85;
+}
+
+.me-row {
+  display: flex;
+  margin-top: 26rpx;
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 18rpx;
+  padding: 18rpx 0;
+}
+
+.me-cell {
+  flex: 1;
+  text-align: center;
+}
+
+.mc-v {
+  font-size: 32rpx;
+  font-weight: 700;
+}
+
+.mc-l {
+  font-size: 21rpx;
+  opacity: 0.8;
+  margin-top: 6rpx;
+}
+
+.code {
+  font-size: 30rpx;
+  font-weight: 800;
+  letter-spacing: 2rpx;
+  color: #b5451a;
+  background: #fdf1e7;
+  padding: 8rpx 18rpx;
+  border-radius: 12rpx;
+}
+
+.tip {
+  margin-top: 12rpx;
+}
+
+.ost {
+  font-size: 23rpx;
+  color: #8a7a6d;
+  background: #f4eee8;
+  padding: 6rpx 16rpx;
+  border-radius: 999rpx;
+}
+
+.ost.wait {
+  color: #b5451a;
+  background: #fdf1e7;
+  font-weight: 600;
+}
+
+.lnk {
+  color: #b5451a;
+  text-decoration: underline;
+}
+
+.login {
+  padding: 56rpx 36rpx;
+  text-align: center;
+}
+
+.login-ic {
+  font-size: 64rpx;
+}
+
+.login-t {
+  font-size: 34rpx;
+  font-weight: 800;
+  margin-top: 16rpx;
+}
+
+.login-s {
+  margin: 14rpx 0 32rpx;
+  line-height: 1.7;
+}
+
+.foot {
+  padding: 20rpx 12rpx 0;
+  font-size: 22rpx;
+  color: #a5978a;
+  text-align: center;
+}

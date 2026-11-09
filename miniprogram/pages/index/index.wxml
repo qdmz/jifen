@@ -1,0 +1,69 @@
+<view class="page">
+  <view class="hero">
+    <view class="hero-name">{{site.market_name || '积分超市'}}</view>
+    <view class="hero-slogan" wx:if="{{site.slogan}}">{{site.slogan}}</view>
+  </view>
+
+  <view class="card pts-card">
+    <block wx:if="{{acc}}">
+      <view class="pts-label">{{acc.name}} · {{acc.grp || '未归户'}}</view>
+      <view class="pts-val">{{acc.points}}<text class="pts-unit">分</text></view>
+      <view class="row between pts-meta">
+        <text class="muted">累计获得 {{acc.earned}}</text>
+        <text class="muted">已兑换 {{acc.spent}}</text>
+      </view>
+      <view class="pts-code" wx:if="{{acc.code}}">积分码 {{acc.code}} · 可凭此码在村民端登录</view>
+    </block>
+    <block wx:else>
+      <view class="pts-label">查一查我家的积分</view>
+      <view class="muted pts-tip">姓名 + 手机号（或身份证后 6 位 / 积分码）即可查看余额与兑换记录</view>
+      <view class="btn primary" bindtap="goBind">查我的积分</view>
+    </block>
+  </view>
+
+  <view class="grid">
+    <view class="grid-i" bindtap="goGoods">
+      <view class="grid-ic">🎁</view>
+      <view class="grid-t">积分兑换</view>
+      <view class="grid-s">看商品、换实物</view>
+    </view>
+    <view class="grid-i" bindtap="goRank">
+      <view class="grid-ic">📊</view>
+      <view class="grid-t">积分排行</view>
+      <view class="grid-s">按户看排名</view>
+    </view>
+    <view class="grid-i" bindtap="goCase">
+      <view class="grid-ic">📣</view>
+      <view class="grid-t">红黑榜</view>
+      <view class="grid-s">表扬与警示</view>
+    </view>
+  </view>
+
+  <view class="card" wx:if="{{site.notice}}">
+    <view class="card-t">兑换须知</view>
+    <view class="notice">{{site.notice}}</view>
+  </view>
+
+  <view class="card">
+    <view class="card-t">
+      <text>热门兑换</text>
+      <text class="more" bindtap="goGoods">全部 ›</text>
+    </view>
+    <view class="empty" wx:if="{{hot.length === 0}}">暂无上架商品</view>
+    <view class="item" wx:for="{{hot}}" wx:key="id">
+      <view class="ic">{{item.icon}}</view>
+      <view class="bd">
+        <view class="nm">{{item.name}}</view>
+        <view class="sub">{{item.spec}} · 库存 {{item.stock}} 件</view>
+      </view>
+      <view class="pts">{{item.points}}<text class="muted"> 分</text></view>
+    </view>
+  </view>
+
+  <view class="err" wx:if="{{err}}">{{err}}</view>
+
+  <view class="foot">
+    积分按户累计、按人记账，不兑现、不转让
+    <block wx:if="{{site.address}}"> · 领取点：{{site.address}}</block>
+  </view>
+</view>

@@ -1,0 +1,37 @@
+<view class="page">
+  <view class="card">
+    <view class="card-t">查我的积分</view>
+    <view class="fld">
+      <view class="lb">姓名</view>
+      <input class="ip" placeholder="与登记的一致，例如 张建国" value="{{name}}"
+             data-k="name" bindinput="onInput" />
+    </view>
+    <view class="fld">
+      <view class="lb">手机号 / 身份证后 6 位 / 积分码</view>
+      <input class="ip" placeholder="三选一，填一个即可" value="{{cred}}"
+             data-k="cred" bindinput="onInput" />
+    </view>
+
+    <block wx:if="{{needGrp}}">
+      <view class="divider"></view>
+      <view class="lb">村里有同名的人，请选择你所在的村民组</view>
+      <view class="cand" wx:for="{{cands}}" wx:key="grp"
+            data-grp="{{item.grp}}" bindtap="pickGrp">
+        <view class="cand-l">{{item.grp}}</view>
+        <view class="cand-s">{{item.n}} 人 · 户主 {{item.hu_zhu}}{{item.phone_mask}}</view>
+      </view>
+    </block>
+
+    <view class="err" wx:if="{{err}}">{{err}}</view>
+
+    <view class="btn primary {{loading ? 'disabled' : ''}}" bindtap="submit">
+      {{loading ? '查询中…' : '查询'}}
+    </view>
+
+    <view class="tip">
+      手机号对不上时，可改用身份证后 6 位或村委会发放的 6 位积分码；仍查不到请到村委会核对登记信息。
+    </view>
+  </view>
+
+  <view class="foot">查到的只是本人（本户）积分信息，不会公开他人明细</view>
+</view>

@@ -323,7 +323,7 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def log_message(self, fmt, *args):
-        log('%s %s' % (self.client_address[0], fmt % args))
+        log('%s %s' % (jifen.client_ip(self), fmt % args))
 
     # ---- 请求入口 ----
     def do_GET(self):
@@ -440,7 +440,7 @@ class Handler(BaseHTTPRequestHandler):
             return self.send_json(400, {'success': False, 'error': '请求格式错误'})
         username = str(data.get('username') or '').strip()
         password = str(data.get('password') or '')
-        ip = self.client_address[0]
+        ip = jifen.client_ip(self)
         wait = login_blocked(ip, username)
         if wait > 0:
             return self.send_json(429, {'success': False,

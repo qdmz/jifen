@@ -1,0 +1,26 @@
+{
+  "appid": "wx367de40d97109686",
+  "projectname": "jifen-miniprogram",
+  "description": "积分超市小程序（对接 jifen 独立服务）",
+  "compileType": "miniprogram",
+  "miniprogramRoot": "./",
+  "libVersion": "3.5.5",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "nodeModules": false,
+    "autoAudits": false,
+    "checkInvalidKey": true,
+    "uglifyFileName": false,
+    "ignoreDevUnusedFiles": false,
+    "ignoreUploadUnusedFiles": true
+  },
+  "packOptions": {
+    "ignore": [],
+    "include": []
+  },
+  "condition": {}
+}

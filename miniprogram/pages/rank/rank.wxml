@@ -1,0 +1,49 @@
+<view class="page">
+  <view class="seg">
+    <view class="seg-i {{seg === 'hu' ? 'on' : ''}}" data-seg="hu" bindtap="pickSeg">家庭榜</view>
+    <view class="seg-i {{seg === 'ppl' ? 'on' : ''}}" data-seg="ppl" bindtap="pickSeg">个人榜</view>
+    <view class="seg-i {{seg === 'case' ? 'on' : ''}}" data-seg="case" bindtap="pickSeg">红黑榜</view>
+  </view>
+
+  <view class="err" wx:if="{{err}}">{{err}}</view>
+
+  <block wx:if="{{seg === 'hu'}}">
+    <view class="empty" wx:if="{{!loading && hu.length === 0}}">还没有积分排行数据</view>
+    <view class="card rk" wx:for="{{hu}}" wx:key="no">
+      <view class="no {{item.no <= 3 ? 'top' : ''}}">{{item.no}}</view>
+      <view class="rbd">
+        <view class="rnm">{{item.name}}</view>
+        <view class="rsub">{{item.grp}} · {{item.members}} 人 · 户均 {{item.avg}} 分</view>
+      </view>
+      <view class="rpts">{{item.points}}<text class="muted"> 分</text></view>
+    </view>
+  </block>
+
+  <block wx:if="{{seg === 'ppl'}}">
+    <view class="empty" wx:if="{{!loading && ppl.length === 0}}">还没有个人积分数据</view>
+    <view class="card rk" wx:for="{{ppl}}" wx:key="no">
+      <view class="no {{item.no <= 3 ? 'top' : ''}}">{{item.no}}</view>
+      <view class="rbd">
+        <view class="rnm">{{item.name}}</view>
+        <view class="rsub">{{item.grp}} · 累计获得 {{item.earned}} 分</view>
+      </view>
+      <view class="rpts">{{item.points}}<text class="muted"> 分</text></view>
+    </view>
+  </block>
+
+  <block wx:if="{{seg === 'case'}}">
+    <view class="empty" wx:if="{{!loading && cases.length === 0}}">暂无红黑榜公示</view>
+    <view class="ccard" wx:for="{{cases}}" wx:key="id">
+      <view class="chead">
+        <text class="cbadge {{item.red ? 'red' : 'black'}}">{{item.red ? '红榜 · 加分' : '黑榜 · 减分'}}</text>
+        <text class="cpts">{{item.points}} 分</text>
+      </view>
+      <view class="ctitle">{{item.title}}</view>
+      <view class="cwho" wx:if="{{item.who || item.grp}}">{{item.who}} {{item.grp}}</view>
+      <view class="cdesc" wx:if="{{item.desc}}">{{item.desc}}</view>
+      <view class="cmeta" wx:if="{{item.happen}}">{{item.happen}}</view>
+    </view>
+  </block>
+
+  <view class="foot">排行榜每 30 分钟更新一次 · 姓名按隐私设置脱敏</view>
+</view>

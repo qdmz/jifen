@@ -1,0 +1,51 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/goods/goods",
+    "pages/rank/rank",
+    "pages/me/me",
+    "pages/bind/bind"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#b5451a",
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "积分超市",
+    "backgroundColor": "#f6f1ea",
+    "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "color": "#9a8b7f",
+    "selectedColor": "#b5451a",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "assets/tabbar/home.png",
+        "selectedIconPath": "assets/tabbar/home-on.png"
+      },
+      {
+        "pagePath": "pages/goods/goods",
+        "text": "兑换",
+        "iconPath": "assets/tabbar/gift.png",
+        "selectedIconPath": "assets/tabbar/gift-on.png"
+      },
+      {
+        "pagePath": "pages/rank/rank",
+        "text": "排行",
+        "iconPath": "assets/tabbar/rank.png",
+        "selectedIconPath": "assets/tabbar/rank-on.png"
+      },
+      {
+        "pagePath": "pages/me/me",
+        "text": "我的",
+        "iconPath": "assets/tabbar/me.png",
+        "selectedIconPath": "assets/tabbar/me-on.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "lazyCodeLoading": "requiredComponents",
+  "sitemapLocation": "sitemap.json"
+}
