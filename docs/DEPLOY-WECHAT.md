@@ -5,6 +5,32 @@
 
 ---
 
+## 当前方案（2026-11-10 起）：小程序走云服务，不再需要备案域名
+
+小程序的数据已经迁到 **WorkBuddy 云服务**（云数据库 + 云函数），请求打的是平台域名
+`https://mp-api.app.workbuddy.host`，**不再回源到本机自建服务**。直接影响：
+
+| 原来的卡点 | 云服务版 |
+|---|---|
+| 需要 ICP 备案域名才能配 request 合法域名 | 不需要自己备案，平台域名已备案 |
+| 需要公网隧道 / CDN 回源 | 不需要，去掉 `start_tunnel.bat` 也能跑 |
+| 后端要一直开着 | 不需要，关掉 `app.py` 小程序照常工作 |
+| 改接口地址要改 `apiBase` | 改成云环境配置（`utils/config.js` 的 `endpoint` / `publishableKey`） |
+
+正式发布前只剩两步微信后台操作：
+
+1. 小程序后台 → 开发 → 开发管理 → 开发设置 → **服务器域名** → `request 合法域名` 添加
+   `https://mp-api.app.workbuddy.host`（平台域名，不需要你去备案）。
+2. 补齐名称、头像、服务类目与**用户隐私保护指引**（收集手机号、身份证后 6 位、订单信息、剪贴板，
+   用途分别是核对账户身份、记录兑换单、复制取货码）。
+
+开发 / 体验阶段仍然建议在开发者工具里勾上「不校验合法域名」，省去反复等白名单生效。
+
+> 下面第 2 节「备案域名 + CDN 回源」是**旧的自建后端方案**，仅在小程序要直连你自己的服务器、
+> 或者要给 H5 / 公众号网页版配域名时才用得上。小程序本身已经不需要了。
+
+---
+
 ## 0. 先说结论：现在卡在哪
 
 我用你给的 AppID / AppSecret 直接调了微信接口，实测结果：
@@ -133,9 +159,12 @@
 | 位置 | 说明 |
 | --- | --- |
 | `miniprogram/` | 原生小程序工程：首页、兑换、排行、我的、查询绑定 5 个页面 |
-| `miniprogram/utils/config.js` | **唯一要改的地方**：`apiBase` 换成你的域名 |
-| `miniprogram/project.config.json` | AppID 已填好，`urlCheck: false`（导入后默认不校验域名） |
-| 后端 | **不用改**。小程序直接复用 `/api/jifen/config|goods|rank|rank_hu|cases|lookup|me|myorders|redeem` |
+| `miniprogram/utils/config.js` | **唯一要改的地方**：云环境 `endpoint` / `publishableKey`（旧后端方案才是 `apiBase`） |
+| `miniprogram/utils/cloud.js` | 云客户端，全局只初始化一次 |
+| `miniprogram/utils/api.js` | 数据层：公开表查询 + 云函数（`jf_lookup` / `jf_me` / `jf_redeem` / `jf_rank` …） |
+| `miniprogram/project.config.json` | AppID 已填好，`nodeModules: true`；依赖产物在 `miniprogram_npm/` |
+| 云端 | 表 `jf_*` + 函数，RLS 保证只有本人能读自己的积分、流水、订单 |
+| 后端（旧方案） | 云服务版不再依赖；`app.py` 仍可用于 H5 网页版和后台管理 |
 
 后端顺手修的一个坑（已上线）：原来按 `client_address` 判定访客 IP，经 Cloudflare 隧道后所有人都是 `127.0.0.1`，一个人输错 6 次会把**全村人**锁 5 分钟。现在优先取 `CF-Connecting-IP` / `X-Forwarded-For`，已验证 A 被锁时 B 仍能正常查。
 

@@ -1,11 +1,19 @@
 /**
- * 接口地址配置
- * apiBase：积分超市服务地址（部署说明见 docs/DEPLOY-WECHAT.md）
- * - 开发/体验：可在微信开发者工具「详情 → 本地设置」勾选「不校验合法域名」
- * - 正式发布：必须换成已在「小程序后台 → 开发管理 → 服务器域名」登记过的 HTTPS 域名
+ * 云服务配置（WorkBuddy Cloud Service）
+ *
+ * 数据现在存在云端：商品、积分账户、流水、兑换订单、红黑榜、站点设置。
+ * 下面几个值来自应用开通云服务时返回的 publicConfig，都是前端可公开的值
+ * （publishableKey 只标识是哪个应用，权限由服务端按来源域名校验）。
+ *
+ * 换成另一个云环境时，只需替换 endpoint 与 publishableKey。
  */
 module.exports = {
-  apiBase: 'https://jifen.qdmzctyun.dpdns.org',
+  cloud: {
+    endpoint: 'https://mp-api.app.workbuddy.host',
+    publishableKey: 'wbpk_nUNWgcn0HMRtr5AmaWfmcN_oeIkcGUmkhM6E4YbK3uwGRxn0KUAbHSj',
+    // 走 WorkBuddy 账号登录时才需要；本小程序用微信登录，留着不影响
+    workBuddyOAuthClientId: 'cb_jq6QyEPkOkJXPcpz0JxS_wbapp_nUNWgcn0HMRtr5AmaWfmcN'
+  },
   // 站点信息缓存时间（毫秒），避免每次进页面都请求
   siteCacheMs: 10 * 60 * 1000
 };

@@ -43,6 +43,21 @@
   line-height: 1.7;
 }
 
+.wxlogin {
+  margin-top: 24rpx;
+}
+
+.btn.wx {
+  background: #f2f7f2;
+  color: #2f6b3a;
+  border: 2rpx solid #d6e6d8;
+  height: 84rpx;
+  line-height: 84rpx;
+  border-radius: 16rpx;
+  text-align: center;
+  font-size: 28rpx;
+}
+
 .foot {
   padding: 20rpx 12rpx 0;
   font-size: 22rpx;

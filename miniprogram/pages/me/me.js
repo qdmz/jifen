@@ -23,7 +23,8 @@ Page({
 
   load: function () {
     var self = this;
-    if (!app.globalData.token) {
+    if (!app.globalData.token && !app.globalData.wxUser) {
+      // 既没有查询凭证、也没有微信登录态 → 没登录
       this.setData({ acc: null, txns: [], pending: [], orders: [], loading: false });
       return Promise.resolve();
     }

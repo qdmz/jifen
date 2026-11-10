@@ -28,6 +28,13 @@
       {{loading ? '查询中…' : '查询'}}
     </view>
 
+    <view class="wxlogin">
+      <view class="btn wx {{wxBusy ? 'disabled' : ''}}" bindtap="onWechatLogin">
+        {{wxBusy ? '登录中…' : (wxLogged ? '已用微信登录' : '用微信登录（下次免输入）')}}
+      </view>
+      <view class="tip" wx:if="{{wxMsg}}">{{wxMsg}}</view>
+    </view>
+
     <view class="tip">
       手机号对不上时，可改用身份证后 6 位或村委会发放的 6 位积分码；仍查不到请到村委会核对登记信息。
     </view>

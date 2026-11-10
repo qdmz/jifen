@@ -15,6 +15,19 @@
 
 ---
 
+## 微信小程序（云服务版）
+
+`miniprogram/` 是配套的微信小程序，数据走 **WorkBuddy 云服务**（云数据库 + 云函数），
+不依赖本机后端在线，也不需要自己备案域名。详见 [miniprogram/README.md](miniprogram/README.md)。
+
+- 云端表：`jf_goods` / `jf_accounts` / `jf_txns` / `jf_orders` / `jf_rules` / `jf_cases` / `jf_settings`
+- 云函数：`jf_lookup`（姓名 + 手机号/身份证后 6 位/积分码）、`jf_me`、`jf_myorders`、
+  `jf_redeem`（扣积分 + 扣库存 + 出取货码，在数据库里一次完成）、`jf_rank`、`jf_rank_hu`
+- 隔离：账户、流水、订单只有本人能读（RLS），客户端不能直接改分
+- 自测：`node tools/cloud_smoke.js` —— 19 项，覆盖公开表、榜单、查分、错误凭证、过期凭证、RLS 隔离、库存不足
+
+---
+
 ## 功能一览
 
 ### 村民端（公开，无需登录）
